@@ -27,9 +27,12 @@ def home(request):
         .filter(user=user, type=Transaction.EXPENSE)
         .aggregate(total=Sum("amount"))["total"] or 0
     )
-
+    # dashboard context: This view serves as the main dashboard for the budget app. 
+    # It calculates the total income and expenses for the logged-in user, computes the current balance, and retrieves the most recent transactions and bills. 
+    # The transactions are ordered by date in descending order, while the bills are ordered first by paid status (unpaid bills come first) and then by due date. The view also counts the total number of bills, as well as how many are paid and unpaid. 
+    # Finally, it renders the "budget/dashboard.html" template with all this information passed in the context.
     balance = income_total - expense_total
-
+    transactions = Transaction.objects.filter(user=user).order_by("-date", "-id")[:10] # this will order the transactions by date in descending order, so that the most recent transactions appear first.
     bills = Bill.objects.filter(user=user).order_by("paid", "due_date") # this will order the bills first by paid status (unpaid bills will come first) and then by due date within each group, so that unpaid bills are prioritized and sorted by their due dates.
     total_bills = bills.count()
     paid_bills = bills.filter(paid=True).count()
@@ -43,6 +46,7 @@ def home(request):
         "paid_bills": paid_bills,
         "unpaid_bills": unpaid_bills,
         "bills": bills,
+        "transactions": transactions,
     }
 
     return render(request, "budget/dashboard.html", context)
