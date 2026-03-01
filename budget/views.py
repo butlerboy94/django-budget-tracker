@@ -30,7 +30,7 @@ def home(request):
 
     balance = income_total - expense_total
 
-    bills = Bill.objects.filter(user=user).order_by("paid", "due_date")
+    bills = Bill.objects.filter(user=user).order_by("paid", "due_date") # this will order the bills first by paid status (unpaid bills will come first) and then by due date within each group, so that unpaid bills are prioritized and sorted by their due dates.
     total_bills = bills.count()
     paid_bills = bills.filter(paid=True).count()
     unpaid_bills = bills.filter(paid=False).count()
