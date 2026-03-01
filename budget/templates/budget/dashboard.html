@@ -40,3 +40,32 @@
 {% else %}
   <p>No bills yet. Add one to get started.</p>
 {% endif %}
+
+<h2>Recent Transactions</h2>
+
+{% if transactions %}
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.date }}</td>
+          <td>{{ tx.get_type_display }}</td>
+          <td>{{ tx.category }}</td>
+          <td>${{ tx.amount }}</td>
+          <td>{{ tx.note|default:"" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No transactions yet. Add one to get started.</p>
+{% endif %}
