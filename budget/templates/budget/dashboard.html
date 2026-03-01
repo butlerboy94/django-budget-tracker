@@ -1,3 +1,10 @@
+{% load static %}
+
+<p>
+  <a href="{% url 'add_transaction' %}">Add Transaction</a> |
+  <a href="{% url 'add_bill' %}">Add Bill</a>
+</p>
+
 <h1>Budget Dashboard</h1>
 
 <h2>Summary</h2>
@@ -9,3 +16,27 @@
 <p>Total Bills: {{ total_bills }}</p>
 <p>Paid: {{ paid_bills }}</p>
 <p>Unpaid: {{ unpaid_bills }}</p>
+
+<h3>Your Bills</h3>
+
+{% if bills %}
+  <ul>
+    {% for bill in bills %}
+      <li>
+        <strong>{{ bill.name }}</strong> —
+        ${{ bill.amount }} —
+        Due: {{ bill.due_date }} —
+        Status: {% if bill.paid %}PAID{% else %}UNPAID{% endif %}
+
+        <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit">
+            Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
+          </button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No bills yet. Add one to get started.</p>
+{% endif %}
