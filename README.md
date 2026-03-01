@@ -1,21 +1,21 @@
-Django Budget Tracker
+## Django Budget Tracker
 
 A full-stack financial management web application built with Django that allows users to track income, expenses, and bills through an interactive dashboard. 
 This project was developed as a capstone application to demonstrate backend development, database design, authentication, financial logic processing, 
 and professional version-controlled software engineering workflow.
 
-Project Overview
+## Project Overview
 
 The Django Budget Tracker is a secure, user-authenticated budgeting application that enables individuals to manage personal finances efficiently. Users can record income and expense transactions, manage bills, and monitor financial summaries through a dynamic dashboard.
 
-This project demonstrates:
+## This project demonstrates:
 - Clean relational database design
 - Secure per-user data isolation
 - Financial aggregation using Django ORM
 - Full CRUD functionality
 - Real-world Git and GitHub workflow practices
 
-Features
+## Features
 - User authentication (login/logout)
 - Secure user-specific financial data
 - Add income and expense transactions
@@ -30,7 +30,7 @@ Features
 - Real-time calculations using Django ORM aggregation
 - Git version control with remote GitHub repository
 
-Tech Stack
+## Tech Stack
 - Python 3
 - Django
 - SQLite
@@ -38,7 +38,7 @@ Tech Stack
 - Git
 - GitHub
 
-Database Design
+## Database Design
 Transaction Model
 - User (ForeignKey)
 - Date
@@ -47,7 +47,7 @@ Transaction Model
 - Amount
 - Optional note
 
-Bill Model
+## Bill Model
 - User (ForeignKey)
 - Name
 - Amount
@@ -56,7 +56,7 @@ Bill Model
 - Optional notes
 Database indexing is implemented for optimized querying by user and date.
 
-Installation & Setup
+## Installation & Setup
 
 Clone the repository:
 - git clone https://github.com/butlerboy94/django-budget-tracker.git
@@ -81,7 +81,7 @@ Start the devlopment server:
 Open the browser:
 - http://127.0.0.1:8000/
 
-Development Workflow
+## Development Workflow
 
 This project follows a professional Git workflow:
 
@@ -91,17 +91,23 @@ This project follows a professional Git workflow:
 - Incremental feature development
 - Version-controlled history tracking
 
-All new features are committed and pushed to GitHub to simulate real-world software engineering practices.
+## All new features are committed and pushed to GitHub to simulate real-world software engineering practices.
 
-Future Enhancements
-- Monthly budgeting filters
-- Financial data visualization (charts)
-- Exportable reports (CSV or PDF)
-- Recurring bill automation
-- UI/UX improvements
-- Category management system
+Future Enhancements:
 
-Author
+[ ] Monthly budgeting filters
+
+[ ] Financial data visualization (charts)
+
+[ ] Exportable reports (CSV or PDF)
+
+[ ] Recurring bill automation
+
+[ ] UI/UX improvements
+
+[ ] Category management system
+
+## Author
 
 - Kaleb Butler
 - Associate of Applied Science – Computer Programming
