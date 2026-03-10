@@ -1,5 +1,6 @@
 {% load static %}
 
+{# Navigation links to the transaction and bill creation forms #}
 <p>
   <a href="{% url 'add_transaction' %}">Add Transaction</a> |
   <a href="{% url 'add_bill' %}">Add Bill</a>
@@ -7,16 +8,19 @@
 
 <h1>Budget Dashboard</h1>
 
+{# Financial summary — values are calculated in the home view using ORM aggregation #}
 <h2>Summary</h2>
 <p>Total Income: ${{ income_total }}</p>
 <p>Total Expenses: ${{ expense_total }}</p>
 <p>Net Balance: ${{ balance }}</p>
 
+{# Bill count statistics passed from the view context #}
 <h2>Bills</h2>
 <p>Total Bills: {{ total_bills }}</p>
 <p>Paid: {{ paid_bills }}</p>
 <p>Unpaid: {{ unpaid_bills }}</p>
 
+{# Bill list — ordered by paid status (unpaid first), then by due date #}
 <h3>Your Bills</h3>
 
 {% if bills %}
@@ -28,6 +32,7 @@
         Due: {{ bill.due_date }} —
         Status: {% if bill.paid %}PAID{% else %}UNPAID{% endif %}
 
+        {# Toggle form — uses POST to prevent accidental paid/unpaid changes via link clicks #}
         <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" style="display:inline;">
           {% csrf_token %}
           <button type="submit">
@@ -41,6 +46,7 @@
   <p>No bills yet. Add one to get started.</p>
 {% endif %}
 
+{# Recent transactions — limited to the 10 most recent, ordered by date descending #}
 <h2>Recent Transactions</h2>
 
 {% if transactions %}
@@ -58,9 +64,11 @@
       {% for tx in transactions %}
         <tr>
           <td>{{ tx.date }}</td>
+          {# get_type_display returns the human-readable label (e.g. "Income") instead of the stored value ("INCOME") #}
           <td>{{ tx.get_type_display }}</td>
           <td>{{ tx.category }}</td>
           <td>${{ tx.amount }}</td>
+          {# default:"" prevents rendering "None" when no note was provided #}
           <td>{{ tx.note|default:"" }}</td>
         </tr>
       {% endfor %}
