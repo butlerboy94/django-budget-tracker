@@ -9,14 +9,20 @@ from .models import Bill, Transaction
 
 
 def register(request):
+    # If the user is already signed in, there is no reason to show the
+    # registration form again, so redirect them back to the dashboard.
     if request.user.is_authenticated:
         return redirect("home")
 
+    # Preserve Django's optional "next" parameter so users who were sent to
+    # register from a protected page can continue where they intended to go.
     next_url = request.GET.get("next") or request.POST.get("next")
 
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
+            # Save the new user account, log the user in immediately, and then
+            # redirect to either the protected destination or the dashboard.
             user = form.save()
             login(request, user)
             messages.success(request, "Your account has been created successfully.")
@@ -29,8 +35,12 @@ def register(request):
 
 @login_required
 def home(request):
+    # All dashboard data is filtered by the logged-in user to keep each
+    # person's budget data private and isolated.
     user = request.user
 
+    # Aggregate income and expense totals separately, then use them to build
+    # the current account balance shown at the top of the dashboard.
     income_total = (
         Transaction.objects
         .filter(user=user, type=Transaction.INCOME)
@@ -44,6 +54,8 @@ def home(request):
     )
 
     balance = income_total - expense_total
+
+    # Show only recent activity on the dashboard to keep the page focused and performannce, but provide a link to the full transaction history for users who want to see more.
     transactions = Transaction.objects.filter(user=user).order_by("-date", "-id")[:10]
     bills = Bill.objects.filter(user=user).order_by("paid", "due_date")
     total_bills = bills.count()
@@ -68,6 +80,8 @@ def add_transaction(request):
     if request.method == "POST":
         form = TransactionForm(request.POST)
         if form.is_valid():
+            # The user field is intentionally assigned here instead of being
+            # exposed in the form so one user cannot create data for another.
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.save()
@@ -90,17 +104,22 @@ def add_transaction(request):
 
 @login_required
 def transaction_list(request):
+    # This management page shows the full transaction history for the current
+    # user, unlike the dashboard which only displays recent activity.
     transactions = Transaction.objects.filter(user=request.user).order_by("-date", "-id")
     return render(request, "budget/transaction_list.html", {"transactions": transactions})
 
 
 @login_required
 def edit_transaction(request, transaction_id):
+    # get_object_or_404 with the current user check prevents users from editing
+    # transactions that do not belong to them.
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
 
     if request.method == "POST":
         form = TransactionForm(request.POST, instance=transaction)
         if form.is_valid():
+            # Keep ownership attached to the current user even during updates.
             updated_transaction = form.save(commit=False)
             updated_transaction.user = request.user
             updated_transaction.save()
@@ -123,9 +142,13 @@ def edit_transaction(request, transaction_id):
 
 @login_required
 def delete_transaction(request, transaction_id):
+    # The same user filter is applied here so delete actions are limited to the
+    # owner of the transaction.
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
 
     if request.method == "POST":
+        # Use a confirmation page first so transactions are not deleted by an
+        # accidental click from the list or dashboard.
         transaction.delete()
         messages.success(request, "Transaction deleted.")
         return redirect("transaction_list")
@@ -142,6 +165,8 @@ def add_bill(request):
     if request.method == "POST":
         form = BillForm(request.POST)
         if form.is_valid():
+            # Bills follow the same ownership pattern as transactions so each
+            # user's billing data stays separate.
             bill = form.save(commit=False)
             bill.user = request.user
             bill.save()
@@ -164,15 +189,19 @@ def add_bill(request):
 
 @login_required
 def toggle_bill_paid(request, bill_id):
+    # This status change should only happen through an explicit form POST.
     if request.method != "POST":
         return redirect("home")
 
     try:
+        # Limit the lookup to the logged-in user to prevent unauthorized edits.
         bill = Bill.objects.get(id=bill_id, user=request.user)
     except Bill.DoesNotExist:
         messages.error(request, "Bill not found.")
         return redirect("home")
 
+    # Flipping the boolean keeps the UI simple: one button can mark a bill as
+    # paid or unpaid depending on its current state.
     bill.paid = not bill.paid
     bill.save()
     messages.success(request, f"Bill marked as {'paid' if bill.paid else 'unpaid'}.")

@@ -1,4 +1,6 @@
 :root {
+  /* Shared design tokens keep colors and spacing easy to reuse and adjust
+     across the full application. */
   --bg: #f4f7fb;
   --surface: #ffffff;
   --surface-alt: #eef3f8;
@@ -22,6 +24,8 @@ body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text);
+  /* Subtle gradients help the capstone project feel more polished without
+     making the interface hard to read. */
   background:
     radial-gradient(circle at top left, rgba(30, 90, 168, 0.12), transparent 30%),
     linear-gradient(180deg, #f8fbfe 0%, var(--bg) 100%);
@@ -42,6 +46,8 @@ a:hover {
 }
 
 .site-header {
+  /* Slight transparency and blur separate the header from the page content
+     while keeping the design lightweight. */
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(8px);
@@ -85,6 +91,7 @@ a:hover {
 
 .button-link,
 .primary-button {
+  /* Primary actions such as create/save use the strongest color treatment. */
   background: var(--primary);
   color: #fff;
   border: none;
@@ -97,6 +104,7 @@ a:hover {
 }
 
 .secondary-button {
+  /* Secondary actions stay visible but less visually dominant. */
   background: var(--surface-alt);
   border: 1px solid var(--border);
   color: var(--text);
@@ -123,6 +131,8 @@ a:hover {
 }
 
 .message {
+  /* Message styling supports Django flash messages for success, errors, and
+     general information after redirects. */
   padding: 0.9rem 1rem;
   border-radius: 14px;
   margin-bottom: 0.75rem;
@@ -153,6 +163,7 @@ a:hover {
 .list-card,
 .form-card,
 .auth-card {
+  /* Card styling gives the app a consistent component system across pages. */
   background: var(--surface);
   border: 1px solid rgba(214, 224, 234, 0.85);
   border-radius: 24px;
@@ -193,6 +204,8 @@ a:hover {
 
 .summary-grid,
 .content-grid {
+  /* Grid layouts allow the dashboard to scale between desktop and smaller
+     screens without rewriting the page structure. */
   display: grid;
   gap: 1rem;
 }
@@ -225,6 +238,8 @@ a:hover {
 }
 
 .stack-form {
+  /* Stack form fields vertically with even spacing for a clean data-entry
+     experience. */
   display: grid;
   gap: 1rem;
 }
@@ -253,6 +268,8 @@ a:hover {
 }
 
 .table-wrap {
+  /* Horizontal scrolling prevents tables from breaking the layout on smaller
+     devices. */
   overflow-x: auto;
 }
 
@@ -298,6 +315,7 @@ th {
 }
 
 .actions-cell {
+  /* Keep edit/delete links together so the actions read like a single group. */
   white-space: nowrap;
 }
 
@@ -310,6 +328,7 @@ th {
 }
 
 .danger-button {
+  /* Destructive actions use a stronger red color to signal caution. */
   background: #b42318;
   color: #fff;
   border: none;
@@ -320,6 +339,7 @@ th {
 }
 
 @media (max-width: 800px) {
+  /* Collapse multi-column layouts into a single column for mobile screens. */
   .nav-shell,
   .content-grid {
     grid-template-columns: 1fr;
