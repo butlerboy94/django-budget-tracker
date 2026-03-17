@@ -1,79 +1,99 @@
-{% load static %}
+{% extends "base.html" %}
 
-{# Navigation links to the transaction and bill creation forms #}
-<p>
-  <a href="{% url 'add_transaction' %}">Add Transaction</a> |
-  <a href="{% url 'add_bill' %}">Add Bill</a>
-</p>
+{% block title %}Dashboard | Budget Tracker{% endblock %}
 
-<h1>Budget Dashboard</h1>
+{% block content %}
+  <section class="hero-card">
+    <h1>Budget Dashboard</h1>
+    <p>Welcome back, {{ user.username }}. Here is a snapshot of your current financial activity.</p>
+    <div class="quick-actions">
+      <a href="{% url 'add_transaction' %}" class="button-link">Add Transaction</a>
+      <a href="{% url 'add_bill' %}" class="secondary-button">Add Bill</a>
+    </div>
+  </section>
 
-{# Financial summary — values are calculated in the home view using ORM aggregation #}
-<h2>Summary</h2>
-<p>Total Income: ${{ income_total }}</p>
-<p>Total Expenses: ${{ expense_total }}</p>
-<p>Net Balance: ${{ balance }}</p>
+  <section class="summary-grid" aria-label="Financial summary">
+    <article class="summary-card">
+      <p class="stat-label">Total Income</p>
+      <p class="stat-value">${{ income_total }}</p>
+    </article>
+    <article class="summary-card">
+      <p class="stat-label">Total Expenses</p>
+      <p class="stat-value">${{ expense_total }}</p>
+    </article>
+    <article class="summary-card">
+      <p class="stat-label">Net Balance</p>
+      <p class="stat-value">${{ balance }}</p>
+    </article>
+    <article class="summary-card">
+      <p class="stat-label">Unpaid Bills</p>
+      <p class="stat-value">{{ unpaid_bills }}</p>
+    </article>
+  </section>
 
-{# Bill count statistics passed from the view context #}
-<h2>Bills</h2>
-<p>Total Bills: {{ total_bills }}</p>
-<p>Paid: {{ paid_bills }}</p>
-<p>Unpaid: {{ unpaid_bills }}</p>
+  <section class="content-grid">
+    <article class="table-card">
+      <div class="section-heading">
+        <h2>Recent Transactions</h2>
+        <p>Your 10 most recent income and expense entries.</p>
+      </div>
 
-{# Bill list — ordered by paid status (unpaid first), then by due date #}
-<h3>Your Bills</h3>
+      {% if transactions %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in transactions %}
+                <tr>
+                  <td>{{ tx.date }}</td>
+                  <td>{{ tx.get_type_display }}</td>
+                  <td>{{ tx.category }}</td>
+                  <td>${{ tx.amount }}</td>
+                  <td>{{ tx.note|default:"" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="muted-text">No transactions yet. Add one to get started.</p>
+      {% endif %}
+    </article>
 
-{% if bills %}
-  <ul>
-    {% for bill in bills %}
-      <li>
-        <strong>{{ bill.name }}</strong> —
-        ${{ bill.amount }} —
-        Due: {{ bill.due_date }} —
-        Status: {% if bill.paid %}PAID{% else %}UNPAID{% endif %}
+    <article class="list-card">
+      <div class="section-heading">
+        <h2>Bill Overview</h2>
+        <p>Total bills: {{ total_bills }}. Paid: {{ paid_bills }}. Unpaid: {{ unpaid_bills }}.</p>
+      </div>
 
-        {# Toggle form — uses POST to prevent accidental paid/unpaid changes via link clicks #}
-        <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit">
-            Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
-          </button>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No bills yet. Add one to get started.</p>
-{% endif %}
+      {% if bills %}
+        <ul class="bill-list">
+          {% for bill in bills %}
+            <li>
+              <strong>{{ bill.name }}</strong><br>
+              ${{ bill.amount }} due on {{ bill.due_date }}<br>
+              Status: {% if bill.paid %}Paid{% else %}Unpaid{% endif %}
 
-{# Recent transactions — limited to the 10 most recent, ordered by date descending #}
-<h2>Recent Transactions</h2>
-
-{% if transactions %}
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Type</th>
-        <th>Category</th>
-        <th>Amount</th>
-        <th>Note</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for tx in transactions %}
-        <tr>
-          <td>{{ tx.date }}</td>
-          {# get_type_display returns the human-readable label (e.g. "Income") instead of the stored value ("INCOME") #}
-          <td>{{ tx.get_type_display }}</td>
-          <td>{{ tx.category }}</td>
-          <td>${{ tx.amount }}</td>
-          {# default:"" prevents rendering "None" when no note was provided #}
-          <td>{{ tx.note|default:"" }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>No transactions yet. Add one to get started.</p>
-{% endif %}
+              <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit" class="secondary-button">
+                  Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
+                </button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted-text">No bills yet. Add one to get started.</p>
+      {% endif %}
+    </article>
+  </section>
+{% endblock %}

@@ -1,17 +1,32 @@
-from django.shortcuts import render, redirect #import HttpResponse
-from django.http import HttpResponse #import HttpResponse to return a response to the user
-from django.contrib.auth.decorators import login_required #import login_required to restrict access to authenticated users only
-from .models import Transaction, Bill #import Transaction model to interact with the database
-from django.db.models import Sum #import Sum to calculate the total income and expenses for the user
-from django.contrib import messages #import messages to display success or error messages to the user
-from .forms import TransactionForm, BillForm #import forms to handle user input for transactions and
-from django.utils import timezone #import timezone to handle date and time for transactions and bills
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.shortcuts import redirect, render
+
+from .forms import BillForm, RegisterForm, TransactionForm
+from .models import Bill, Transaction
 
 
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    next_url = request.GET.get("next") or request.POST.get("next")
+
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Your account has been created successfully.")
+            return redirect(next_url or "home")
+    else:
+        form = RegisterForm()
+
+    return render(request, "registration/register.html", {"form": form, "next": next_url})
 
 
-# Create your views here.
-#this view is a simple home page that displays a welcome message and the number of transactions the logged-in user has. The @login_required decorator ensures that only authenticated users can access this view.
 @login_required
 def home(request):
     user = request.user
@@ -27,13 +42,10 @@ def home(request):
         .filter(user=user, type=Transaction.EXPENSE)
         .aggregate(total=Sum("amount"))["total"] or 0
     )
-    # dashboard context: This view serves as the main dashboard for the budget app. 
-    # It calculates the total income and expenses for the logged-in user, computes the current balance, and retrieves the most recent transactions and bills. 
-    # The transactions are ordered by date in descending order, while the bills are ordered first by paid status (unpaid bills come first) and then by due date. The view also counts the total number of bills, as well as how many are paid and unpaid. 
-    # Finally, it renders the "budget/dashboard.html" template with all this information passed in the context.
+
     balance = income_total - expense_total
-    transactions = Transaction.objects.filter(user=user).order_by("-date", "-id")[:10] # this will order the transactions by date in descending order, so that the most recent transactions appear first.
-    bills = Bill.objects.filter(user=user).order_by("paid", "due_date") # this will order the bills first by paid status (unpaid bills will come first) and then by due date within each group, so that unpaid bills are prioritized and sorted by their due dates.
+    transactions = Transaction.objects.filter(user=user).order_by("-date", "-id")[:10]
+    bills = Bill.objects.filter(user=user).order_by("paid", "due_date")
     total_bills = bills.count()
     paid_bills = bills.filter(paid=True).count()
     unpaid_bills = bills.filter(paid=False).count()
@@ -48,27 +60,34 @@ def home(request):
         "bills": bills,
         "transactions": transactions,
     }
-
     return render(request, "budget/dashboard.html", context)
 
-# This view handles the addition of new transactions. It checks if the request method is POST, validates the form data, and saves the transaction to the database. If the form is valid, it redirects the user back to the home page with a success message. If the request method is GET, it simply renders an empty form for the user to fill out.
+
 @login_required
 def add_transaction(request):
     if request.method == "POST":
         form = TransactionForm(request.POST)
         if form.is_valid():
-            tx = form.save(commit=False)
-            tx.user = request.user
-            tx.save()
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            transaction.save()
             messages.success(request, "Transaction added.")
             return redirect("home")
     else:
         form = TransactionForm()
 
-    return render(request, "budget/transaction_form.html", {"form": form})
+    return render(
+        request,
+        "budget/transaction_form.html",
+        {
+            "form": form,
+            "page_title": "Add Transaction",
+            "heading": "Add Transaction",
+            "submit_label": "Save Transaction",
+        },
+    )
 
 
-# This view handles the addition of new bills. Similar to the add_transaction view, it checks if the request method is POST, validates the form data, and saves the bill to the database. If the form is valid, it redirects the user back to the home page with a success message. If the request method is GET, it renders an empty form for the user to fill out.
 @login_required
 def add_bill(request):
     if request.method == "POST":
@@ -82,13 +101,20 @@ def add_bill(request):
     else:
         form = BillForm()
 
-    return render(request, "budget/bill_form.html", {"form": form})
+    return render(
+        request,
+        "budget/bill_form.html",
+        {
+            "form": form,
+            "page_title": "Add Bill",
+            "heading": "Add Bill",
+            "submit_label": "Save Bill",
+        },
+    )
 
 
-# This view toggles the paid status of a bill. It only accepts POST requests to prevent accidental changes via link clicks. It retrieves the bill based on the provided bill_id and checks if it belongs to the logged-in user. If the bill is found, it toggles the paid status and saves the change to the database. Finally, it redirects the user back to the home page with a success message indicating whether the bill is now marked as paid or unpaid.
 @login_required
 def toggle_bill_paid(request, bill_id):
-    # POST-only toggle to avoid accidental changes via link clicks
     if request.method != "POST":
         return redirect("home")
 

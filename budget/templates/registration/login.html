@@ -1,14 +1,32 @@
-<!doctype html>
-<html>
-<head>
-  <title>Login</title>
-</head>
-<body>
-  <h1>Login</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Log In</button>
-  </form>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Log In | Budget Tracker{% endblock %}
+
+{% block content %}
+  <section class="auth-card">
+    <div class="section-heading">
+      <h1>Welcome Back</h1>
+      <p>Log in to view your dashboard and manage your finances.</p>
+    </div>
+
+    <form method="post" class="stack-form">
+      {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+      {{ form.non_field_errors }}
+
+      {% for field in form %}
+        <div class="form-row">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="primary-button">Log In</button>
+    </form>
+
+    <p class="auth-link">Need an account? <a href="{% url 'register' %}">Create one here</a>.</p>
+  </section>
+{% endblock %}

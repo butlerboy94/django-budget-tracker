@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}{{ page_title }} | Budget Tracker{% endblock %}
+{% block title %}Create Account | Budget Tracker{% endblock %}
 
 {% block content %}
-  <section class="form-card">
+  <section class="auth-card">
     <div class="section-heading">
-      <h1>{{ heading }}</h1>
-      <p>Enter the transaction details below to update your financial records.</p>
+      <h1>Create Your Account</h1>
+      <p>Set up a Budget Tracker account to start managing your finances.</p>
     </div>
 
     <form method="post" class="stack-form">
       {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
       {{ form.non_field_errors }}
 
       {% for field in form %}
@@ -24,10 +27,9 @@
         </div>
       {% endfor %}
 
-      <div class="quick-actions">
-        <button type="submit" class="primary-button">{{ submit_label }}</button>
-        <a href="{% url 'home' %}" class="secondary-button">Back to Dashboard</a>
-      </div>
+      <button type="submit" class="primary-button">Create Account</button>
     </form>
+
+    <p class="auth-link">Already have an account? <a href="{% url 'login' %}">Log in here</a>.</p>
   </section>
 {% endblock %}

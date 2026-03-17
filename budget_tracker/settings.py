@@ -118,5 +118,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # Login and logout redirects
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "login"
