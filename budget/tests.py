@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Transaction
+from .models import Bill, Transaction
 
 User = get_user_model()
 
@@ -108,3 +108,92 @@ class TransactionCrudTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Transaction.objects.filter(id=transaction.id).exists())
         self.assertContains(response, "Transaction deleted.")
+
+
+class BillCrudTests(TestCase):
+    def setUp(self):
+        # Create two users so the tests can verify bill ownership rules.
+        self.user = User.objects.create_user(username="billuser1", password="CapstonePass123!")
+        self.other_user = User.objects.create_user(username="billuser2", password="CapstonePass123!")
+        self.client.login(username="billuser1", password="CapstonePass123!")
+
+    def test_bill_list_only_shows_current_users_records(self):
+        Bill.objects.create(
+            user=self.user,
+            name="Electric Bill",
+            amount="120.00",
+            due_date="2026-03-20",
+            paid=False,
+            notes="Current user bill",
+        )
+        Bill.objects.create(
+            user=self.other_user,
+            name="Internet Bill",
+            amount="80.00",
+            due_date="2026-03-25",
+            paid=False,
+            notes="Other user bill",
+        )
+
+        response = self.client.get(reverse("bill_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current user bill")
+        self.assertNotContains(response, "Other user bill")
+
+    def test_user_can_edit_their_own_bill(self):
+        bill = Bill.objects.create(
+            user=self.user,
+            name="Phone Bill",
+            amount="60.00",
+            due_date="2026-03-18",
+            paid=False,
+            notes="Original note",
+        )
+
+        response = self.client.post(
+            reverse("edit_bill", args=[bill.id]),
+            {
+                "name": "Updated Phone Bill",
+                "amount": "65.50",
+                "due_date": "2026-03-22",
+                "paid": "on",
+                "notes": "Updated note",
+            },
+            follow=True,
+        )
+
+        bill.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(bill.name, "Updated Phone Bill")
+        self.assertEqual(str(bill.amount), "65.50")
+        self.assertTrue(bill.paid)
+        self.assertContains(response, "Bill updated.")
+
+    def test_user_cannot_edit_another_users_bill(self):
+        bill = Bill.objects.create(
+            user=self.other_user,
+            name="Rent",
+            amount="900.00",
+            due_date="2026-03-05",
+            paid=False,
+        )
+
+        response = self.client.get(reverse("edit_bill", args=[bill.id]))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_user_can_delete_their_own_bill(self):
+        bill = Bill.objects.create(
+            user=self.user,
+            name="Water Bill",
+            amount="45.00",
+            due_date="2026-03-28",
+            paid=False,
+        )
+
+        response = self.client.post(reverse("delete_bill", args=[bill.id]), follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Bill.objects.filter(id=bill.id).exists())
+        self.assertContains(response, "Bill deleted.")

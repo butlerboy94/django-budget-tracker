@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Bills | Budget Tracker{% endblock %}
+
+{% block content %}
+  {# Header section introduces the bill management page and quick actions. #}
+  <section class="hero-card">
+    <h1>Bills</h1>
+    <p>Review upcoming bills, update payment status, and manage due dates.</p>
+    <div class="quick-actions">
+      <a href="{% url 'add_bill' %}" class="button-link">Add Bill</a>
+      <a href="{% url 'home' %}" class="secondary-button">Back to Dashboard</a>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="section-heading">
+      <h2>All Bills</h2>
+      <p>Unpaid bills appear first so the most urgent items are easier to review.</p>
+    </div>
+
+    {% if bills %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Amount</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for bill in bills %}
+              <tr>
+                <td>{{ bill.name }}</td>
+                <td>${{ bill.amount }}</td>
+                <td>{{ bill.due_date }}</td>
+                <td>{% if bill.paid %}Paid{% else %}Unpaid{% endif %}</td>
+                <td>{{ bill.notes|default:"" }}</td>
+                <td class="actions-cell">
+                  <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary-button">
+                      Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
+                    </button>
+                  </form>
+                  <a href="{% url 'edit_bill' bill.id %}">Edit</a>
+                  <a href="{% url 'delete_bill' bill.id %}">Delete</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted-text">You have not added any bills yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

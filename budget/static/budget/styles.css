@@ -306,6 +306,14 @@ th {
   border-bottom: none;
 }
 
+.bill-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 0.65rem;
+}
+
 .inline-form {
   display: inline;
 }

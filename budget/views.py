@@ -188,6 +188,55 @@ def add_bill(request):
 
 
 @login_required
+def bill_list(request):
+    # This management page shows every bill for the current user so payment
+    # deadlines and statuses can be reviewed in one place.
+    bills = Bill.objects.filter(user=request.user).order_by("paid", "due_date", "-id")
+    return render(request, "budget/bill_list.html", {"bills": bills})
+
+
+@login_required
+def edit_bill(request, bill_id):
+    # Restrict editing to bills owned by the logged-in user.
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+
+    if request.method == "POST":
+        form = BillForm(request.POST, instance=bill)
+        if form.is_valid():
+            updated_bill = form.save(commit=False)
+            updated_bill.user = request.user
+            updated_bill.save()
+            messages.success(request, "Bill updated.")
+            return redirect("bill_list")
+    else:
+        form = BillForm(instance=bill)
+
+    return render(
+        request,
+        "budget/bill_form.html",
+        {
+            "form": form,
+            "page_title": "Edit Bill",
+            "heading": "Edit Bill",
+            "submit_label": "Update Bill",
+        },
+    )
+
+
+@login_required
+def delete_bill(request, bill_id):
+    # Restrict deletion to bills owned by the logged-in user.
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+
+    if request.method == "POST":
+        bill.delete()
+        messages.success(request, "Bill deleted.")
+        return redirect("bill_list")
+
+    return render(request, "budget/bill_confirm_delete.html", {"bill": bill})
+
+
+@login_required
 def toggle_bill_paid(request, bill_id):
     # This status change should only happen through an explicit form POST.
     if request.method != "POST":

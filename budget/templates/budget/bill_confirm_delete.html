@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Bill | Budget Tracker{% endblock %}
+
+{% block content %}
+  {# Confirmation screen prevents accidental removal of a bill record. #}
+  <section class="form-card">
+    <div class="section-heading">
+      <h1>Delete Bill</h1>
+      <p>Confirm that you want to remove this bill from your records.</p>
+    </div>
+
+    <div class="summary-card">
+      <p><strong>Name:</strong> {{ bill.name }}</p>
+      <p><strong>Amount:</strong> ${{ bill.amount }}</p>
+      <p><strong>Due Date:</strong> {{ bill.due_date }}</p>
+      <p><strong>Status:</strong> {% if bill.paid %}Paid{% else %}Unpaid{% endif %}</p>
+      <p><strong>Notes:</strong> {{ bill.notes|default:"No notes provided." }}</p>
+    </div>
+
+    <form method="post" class="stack-form">
+      {% csrf_token %}
+      <div class="quick-actions">
+        <button type="submit" class="primary-button danger-button">Delete Bill</button>
+        <a href="{% url 'bill_list' %}" class="secondary-button">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

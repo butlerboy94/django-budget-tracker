@@ -16,7 +16,10 @@ urlpatterns = [
     path("transactions/<int:transaction_id>/edit/", views.edit_transaction, name="edit_transaction"),
     path("transactions/<int:transaction_id>/delete/", views.delete_transaction, name="delete_transaction"),
 
-    # Bill routes currently support create plus quick paid/unpaid toggling
+    # Bill CRUD routes plus quick paid/unpaid toggling
+    path("bills/", views.bill_list, name="bill_list"),
     path("bills/add/", views.add_bill, name="add_bill"),
+    path("bills/<int:bill_id>/edit/", views.edit_bill, name="edit_bill"),
+    path("bills/<int:bill_id>/delete/", views.delete_bill, name="delete_bill"),
     path("bills/<int:bill_id>/toggle/", views.toggle_bill_paid, name="toggle_bill_paid"),
 ]

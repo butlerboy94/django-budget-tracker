@@ -10,6 +10,7 @@
     <div class="quick-actions">
       <a href="{% url 'add_transaction' %}" class="button-link">Add Transaction</a>
       <a href="{% url 'transaction_list' %}" class="secondary-button">View Transactions</a>
+      <a href="{% url 'bill_list' %}" class="secondary-button">View Bills</a>
       <a href="{% url 'add_bill' %}" class="secondary-button">Add Bill</a>
     </div>
   </section>
@@ -96,12 +97,16 @@
               ${{ bill.amount }} due on {{ bill.due_date }}<br>
               Status: {% if bill.paid %}Paid{% else %}Unpaid{% endif %}
 
-              <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" class="inline-form">
-                {% csrf_token %}
-                <button type="submit" class="secondary-button">
-                  Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
-                </button>
-              </form>
+              <div class="bill-actions">
+                <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" class="inline-form">
+                  {% csrf_token %}
+                  <button type="submit" class="secondary-button">
+                    Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
+                  </button>
+                </form>
+                <a href="{% url 'edit_bill' bill.id %}">Edit</a>
+                <a href="{% url 'delete_bill' bill.id %}">Delete</a>
+              </div>
             </li>
           {% endfor %}
         </ul>
