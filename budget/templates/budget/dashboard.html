@@ -35,8 +35,7 @@
     </article>
   </section>
 
-  <!-- {# The lower dashboard area combines recent transactions with bill status so
-     the user can review both from one screen. #} -->
+  {# The lower dashboard area combines recent transactions with bill status so the user can review both from one screen. #}
   <section class="content-grid">
     <article class="table-card">
       <div class="section-heading">
@@ -48,8 +47,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <!--{# Actions are included here so users can jump straight from the
-                 dashboard into edit or delete workflows. #} -->
+              {# Actions are included here so users can jump straight from the dashboard into edit or delete workflows. #}
               <tr>
                 <th>Date</th>
                 <th>Type</th>
@@ -87,8 +85,7 @@
         <p>Total bills: {{ total_bills }}. Paid: {{ paid_bills }}. Unpaid: {{ unpaid_bills }}.</p>
       </div>
 
-      <!-- {# Bills stay on the dashboard because the user often needs quick status
-         visibility even before full bill CRUD is added. #} -->
+      {# Bills stay on the dashboard because the user often needs quick status visibility even before full bill CRUD is added. #}
       {% if bills %}
         <ul class="bill-list">
           {% for bill in bills %}

@@ -1,6 +1,5 @@
 {% load static %}
-<!-- {# Base layout shared across the app so navigation, flash messages, and styling
-   stay consistent on every page. #} -->
+{# Base layout shared across the app so navigation, flash messages, and styling stay consistent on every page. #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,8 +16,7 @@
         <p class="tagline">Track income, expenses, and bills in one place.</p>
       </div>
 
-      <!-- {# Show different navigation options depending on whether the user is
-         signed in or still at the public auth pages. #} -->
+      {# Show different navigation options depending on whether the user is signed in or still at the public auth pages. #}
       <nav class="nav-links" aria-label="Main navigation">
         {% if user.is_authenticated %}
           <a href="{% url 'home' %}">Dashboard</a>
@@ -39,8 +37,7 @@
   </header>
 
   <main class="container page-content">
-    <!--{# Django's messages framework displays success and error feedback after
-       redirects, such as after creating, editing, or deleting a record. #} -->
+    {# Django's messages framework displays success and error feedback after redirects, such as after creating, editing, or deleting a record. #}
     {% if messages %}
       <section class="messages" aria-label="System messages">
         {% for message in messages %}
