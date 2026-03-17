@@ -1,23 +1,29 @@
 from django.contrib import admin
 from .models import Transaction, Bill
 
-# Register Transaction and Bill models with the Django admin site
-# so they are accessible and manageable from the /admin/ panel.
+# This file controls how models appear in Django's built-in admin panel.
+# The admin site is helpful for quickly reviewing or editing data during
+# development and demos.
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    # Columns shown in the transaction list view in the admin panel
-    list_display = ("id","user", "date", "type", "category", "amount")
-    # Sidebar filters for narrowing down transactions by type, category, or date
+    # list_display controls which columns show in the transaction table.
+    list_display = ("id", "user", "date", "type", "category", "amount")
+
+    # list_filter adds filter boxes on the right side of the admin page.
     list_filter = ("type", "category", "date")
-    # Fields that the admin search bar will query against
+
+    # search_fields lets the admin search by username, category, or note text.
     search_fields = ("user__username", "category", "note")
+
 
 @admin.register(Bill)
 class BillAdmin(admin.ModelAdmin):
-    # Columns shown in the bill list view in the admin panel
+    # Show the most useful bill fields in the admin table.
     list_display = ("id", "user", "name", "amount", "due_date", "paid")
-    # Sidebar filters for narrowing down bills by paid status or due date
+
+    # Let the admin quickly filter bills by payment status or due date.
     list_filter = ("paid", "due_date")
-    # Fields that the admin search bar will query against
+
+    # Let the admin search bills by username, bill name, or notes.
     search_fields = ("user__username", "name", "notes")

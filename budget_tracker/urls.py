@@ -1,24 +1,19 @@
 """
 URL configuration for budget_tracker project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+This file is the main traffic controller for the whole project. It decides
+which app should handle each URL.
 """
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls), #admin urls
-    path('accounts/', include('django.contrib.auth.urls')), #login/logout urls. this will route the /accounts/ URL to the built-in authentication views provided by Django
-    path('', include('budget.urls')), #include urls from the budget app. this will route the root URL to the budget app's urls.py
+    # Django's built-in admin site for managing data as an administrator.
+    path('admin/', admin.site.urls),
+
+    # Django's built-in authentication URLs provide login and logout views.
+    path('accounts/', include('django.contrib.auth.urls')),
+
+    # Send all remaining URLs to the budget app.
+    path('', include('budget.urls')),
 ]

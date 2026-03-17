@@ -9,6 +9,7 @@ from .models import Bill, Transaction
 
 
 def register(request):
+    # This view handles account creation for new users.
     # If the user is already signed in, there is no reason to show the
     # registration form again, so redirect them back to the dashboard.
     if request.user.is_authenticated:
@@ -35,6 +36,7 @@ def register(request):
 
 @login_required
 def home(request):
+    # This is the main dashboard page users see after logging in.
     # All dashboard data is filtered by the logged-in user to keep each
     # person's budget data private and isolated.
     user = request.user
@@ -55,8 +57,12 @@ def home(request):
 
     balance = income_total - expense_total
 
-    # Show only recent activity on the dashboard to keep the page focused and performannce, but provide a link to the full transaction history for users who want to see more.
+    # Show only recent activity on the dashboard to keep the page focused,
+    # while still giving the user a link to the full transaction history.
     transactions = Transaction.objects.filter(user=user).order_by("-date", "-id")[:10]
+
+    # Bills are ordered with unpaid items first so important items appear near
+    # the top of the dashboard.
     bills = Bill.objects.filter(user=user).order_by("paid", "due_date")
     total_bills = bills.count()
     paid_bills = bills.filter(paid=True).count()
@@ -77,6 +83,7 @@ def home(request):
 
 @login_required
 def add_transaction(request):
+    # This view displays the transaction form and saves a new transaction.
     if request.method == "POST":
         form = TransactionForm(request.POST)
         if form.is_valid():
@@ -104,6 +111,7 @@ def add_transaction(request):
 
 @login_required
 def transaction_list(request):
+    # Show every transaction that belongs to the current user.
     # This management page shows the full transaction history for the current
     # user, unlike the dashboard which only displays recent activity.
     transactions = Transaction.objects.filter(user=request.user).order_by("-date", "-id")
@@ -112,6 +120,7 @@ def transaction_list(request):
 
 @login_required
 def edit_transaction(request, transaction_id):
+    # This view lets a user update one existing transaction.
     # get_object_or_404 with the current user check prevents users from editing
     # transactions that do not belong to them.
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
@@ -142,6 +151,7 @@ def edit_transaction(request, transaction_id):
 
 @login_required
 def delete_transaction(request, transaction_id):
+    # This view shows a confirmation page and then deletes the transaction.
     # The same user filter is applied here so delete actions are limited to the
     # owner of the transaction.
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
@@ -162,6 +172,7 @@ def delete_transaction(request, transaction_id):
 
 @login_required
 def add_bill(request):
+    # This view displays the bill form and saves a new bill.
     if request.method == "POST":
         form = BillForm(request.POST)
         if form.is_valid():
@@ -189,6 +200,7 @@ def add_bill(request):
 
 @login_required
 def bill_list(request):
+    # Show every bill that belongs to the current user.
     # This management page shows every bill for the current user so payment
     # deadlines and statuses can be reviewed in one place.
     bills = Bill.objects.filter(user=request.user).order_by("paid", "due_date", "-id")
@@ -197,6 +209,7 @@ def bill_list(request):
 
 @login_required
 def edit_bill(request, bill_id):
+    # This view lets a user update one existing bill.
     # Restrict editing to bills owned by the logged-in user.
     bill = get_object_or_404(Bill, id=bill_id, user=request.user)
 
@@ -225,6 +238,7 @@ def edit_bill(request, bill_id):
 
 @login_required
 def delete_bill(request, bill_id):
+    # This view shows a confirmation page and then deletes the bill.
     # Restrict deletion to bills owned by the logged-in user.
     bill = get_object_or_404(Bill, id=bill_id, user=request.user)
 
@@ -238,6 +252,7 @@ def delete_bill(request, bill_id):
 
 @login_required
 def toggle_bill_paid(request, bill_id):
+    # This view flips a bill between paid and unpaid.
     # This status change should only happen through an explicit form POST.
     if request.method != "POST":
         return redirect("home")
