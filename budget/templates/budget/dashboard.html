@@ -8,6 +8,7 @@
     <p>Welcome back, {{ user.username }}. Here is a snapshot of your current financial activity.</p>
     <div class="quick-actions">
       <a href="{% url 'add_transaction' %}" class="button-link">Add Transaction</a>
+      <a href="{% url 'transaction_list' %}" class="secondary-button">View Transactions</a>
       <a href="{% url 'add_bill' %}" class="secondary-button">Add Bill</a>
     </div>
   </section>
@@ -48,6 +49,7 @@
                 <th>Category</th>
                 <th>Amount</th>
                 <th>Note</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -58,6 +60,10 @@
                   <td>{{ tx.category }}</td>
                   <td>${{ tx.amount }}</td>
                   <td>{{ tx.note|default:"" }}</td>
+                  <td class="actions-cell">
+                    <a href="{% url 'edit_transaction' tx.id %}">Edit</a>
+                    <a href="{% url 'delete_transaction' tx.id %}">Delete</a>
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>

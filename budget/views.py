@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import BillForm, RegisterForm, TransactionForm
 from .models import Bill, Transaction
@@ -85,6 +85,55 @@ def add_transaction(request):
             "heading": "Add Transaction",
             "submit_label": "Save Transaction",
         },
+    )
+
+
+@login_required
+def transaction_list(request):
+    transactions = Transaction.objects.filter(user=request.user).order_by("-date", "-id")
+    return render(request, "budget/transaction_list.html", {"transactions": transactions})
+
+
+@login_required
+def edit_transaction(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+
+    if request.method == "POST":
+        form = TransactionForm(request.POST, instance=transaction)
+        if form.is_valid():
+            updated_transaction = form.save(commit=False)
+            updated_transaction.user = request.user
+            updated_transaction.save()
+            messages.success(request, "Transaction updated.")
+            return redirect("transaction_list")
+    else:
+        form = TransactionForm(instance=transaction)
+
+    return render(
+        request,
+        "budget/transaction_form.html",
+        {
+            "form": form,
+            "page_title": "Edit Transaction",
+            "heading": "Edit Transaction",
+            "submit_label": "Update Transaction",
+        },
+    )
+
+
+@login_required
+def delete_transaction(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+
+    if request.method == "POST":
+        transaction.delete()
+        messages.success(request, "Transaction deleted.")
+        return redirect("transaction_list")
+
+    return render(
+        request,
+        "budget/transaction_confirm_delete.html",
+        {"transaction": transaction},
     )
 
 

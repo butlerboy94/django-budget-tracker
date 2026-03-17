@@ -297,6 +297,28 @@ th {
   margin-top: 0.65rem;
 }
 
+.actions-cell {
+  white-space: nowrap;
+}
+
+.actions-cell a {
+  margin-right: 0.75rem;
+}
+
+.actions-cell a:last-child {
+  margin-right: 0;
+}
+
+.danger-button {
+  background: #b42318;
+  color: #fff;
+  border: none;
+}
+
+.danger-button:hover {
+  background: #8f1c13;
+}
+
 @media (max-width: 800px) {
   .nav-shell,
   .content-grid {
