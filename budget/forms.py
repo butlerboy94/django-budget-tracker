@@ -5,35 +5,51 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Bill, Transaction
 
 # Ask Django for the active User model instead of importing it directly.
-# This is the recommended approach because it works even if the project later
-# switches to a custom user model.
 User = get_user_model()
 
 
-class RegisterForm(UserCreationForm):
+class BootstrapFormMixin:
+    """Automatically adds Bootstrap CSS classes to every widget in a form.
+
+    Loops through all fields after the parent __init__ runs and sets the
+    appropriate class based on the widget type:
+      - Select / SelectMultiple  → form-select
+      - CheckboxInput            → form-check-input
+      - Everything else          → form-control
+    This keeps Bootstrap styling in one place instead of repeating it on
+    every widget definition across multiple form classes.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            widget = field.widget
+            if isinstance(widget, (forms.Select, forms.SelectMultiple)):
+                widget.attrs.setdefault("class", "form-select")
+            elif isinstance(widget, forms.CheckboxInput):
+                widget.attrs.setdefault("class", "form-check-input")
+            else:
+                widget.attrs.setdefault("class", "form-control")
+
+
+class RegisterForm(BootstrapFormMixin, UserCreationForm):
     # Add an email field to Django's default user registration form.
     email = forms.EmailField(required=True)
 
     class Meta(UserCreationForm.Meta):
-        # This tells Django which model the form saves to and which fields
-        # should appear on the registration page.
         model = User
         fields = ("username", "email", "password1", "password2")
 
     def __init__(self, *args, **kwargs):
-        # Call the parent class first so the default fields are created.
+        # BootstrapFormMixin.__init__ is called via super() through the MRO,
+        # which adds Bootstrap classes after UserCreationForm builds its fields.
         super().__init__(*args, **kwargs)
-
-        # Replace Django's longer default help text with shorter explanations
-        # that are easier for a beginner user to understand.
         self.fields["username"].help_text = "Required. Choose a username for your account."
         self.fields["email"].help_text = "Required. Used for your account profile."
         self.fields["password1"].help_text = "Use at least 8 characters and avoid common passwords."
         self.fields["password2"].help_text = "Enter the same password again for verification."
 
     def save(self, commit=True):
-        # Save the new user, but manually copy the email field because
-        # UserCreationForm does not handle that for us by default.
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
         if commit:
@@ -41,29 +57,21 @@ class RegisterForm(UserCreationForm):
         return user
 
 
-class TransactionForm(forms.ModelForm):
-    # A ModelForm automatically builds form fields from the Transaction model.
+class TransactionForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Transaction
         fields = ["date", "type", "category", "amount", "note"]
         widgets = {
-            # Use the browser's date picker for easier date entry.
             "date": forms.DateInput(attrs={"type": "date"}),
-
-            # Keep the note field compact on the page.
             "note": forms.Textarea(attrs={"rows": 3}),
         }
 
 
-class BillForm(forms.ModelForm):
-    # A ModelForm for creating and updating Bill records.
+class BillForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Bill
         fields = ["name", "amount", "due_date", "paid", "notes"]
         widgets = {
-            # Use the browser's date picker for due dates.
             "due_date": forms.DateInput(attrs={"type": "date"}),
-
-            # Keep the notes box from taking up too much space.
             "notes": forms.Textarea(attrs={"rows": 3}),
         }

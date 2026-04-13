@@ -4,31 +4,48 @@
 
 {% block content %}
   {# Reusable bill form template for both create and edit actions. #}
-  <section class="form-card">
-    <div class="section-heading">
-      <h1>{{ heading }}</h1>
-      <p>Add a bill with its due date and payment status so it appears on your dashboard.</p>
-    </div>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h1 class="card-title h4">{{ heading }}</h1>
+          <p class="text-muted">Add a bill with its due date and payment status so it appears on your dashboard.</p>
 
-    <form method="post" class="stack-form">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+          <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-      {% for field in form %}
-        <div class="form-row">
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% if field.help_text %}
-            <p class="help-text">{{ field.help_text }}</p>
-          {% endif %}
-          {{ field.errors }}
+            {% for field in form %}
+              {# Checkboxes use a different Bootstrap layout than text inputs. #}
+              {% if field.field.widget.input_type == 'checkbox' %}
+                <div class="mb-3 form-check">
+                  {{ field }}
+                  <label for="{{ field.id_for_label }}" class="form-check-label">{{ field.label }}</label>
+                  {% for error in field.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="mb-3">
+                  <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div>
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endfor %}
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+              <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">Back to Bills</a>
+            </div>
+          </form>
         </div>
-      {% endfor %}
-
-      <div class="quick-actions">
-        <button type="submit" class="primary-button">{{ submit_label }}</button>
-        <a href="{% url 'bill_list' %}" class="secondary-button">Back to Bills</a>
       </div>
-    </form>
-  </section>
+    </div>
+  </div>
 {% endblock %}

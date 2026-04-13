@@ -4,26 +4,30 @@
 
 {% block content %}
   {# Confirmation screen prevents accidental removal of a bill record. #}
-  <section class="form-card">
-    <div class="section-heading">
-      <h1>Delete Bill</h1>
-      <p>Confirm that you want to remove this bill from your records.</p>
-    </div>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+          <h4 class="mb-0">Delete Bill</h4>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">Confirm that you want to remove this bill from your records.</p>
 
-    <div class="summary-card">
-      <p><strong>Name:</strong> {{ bill.name }}</p>
-      <p><strong>Amount:</strong> ${{ bill.amount }}</p>
-      <p><strong>Due Date:</strong> {{ bill.due_date }}</p>
-      <p><strong>Status:</strong> {% if bill.paid %}Paid{% else %}Unpaid{% endif %}</p>
-      <p><strong>Notes:</strong> {{ bill.notes|default:"No notes provided." }}</p>
-    </div>
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><strong>Name:</strong> {{ bill.name }}</li>
+            <li class="list-group-item"><strong>Amount:</strong> ${{ bill.amount }}</li>
+            <li class="list-group-item"><strong>Due Date:</strong> {{ bill.due_date }}</li>
+            <li class="list-group-item"><strong>Status:</strong> {% if bill.paid %}Paid{% else %}Unpaid{% endif %}</li>
+            <li class="list-group-item"><strong>Notes:</strong> {{ bill.notes|default:"No notes provided." }}</li>
+          </ul>
 
-    <form method="post" class="stack-form">
-      {% csrf_token %}
-      <div class="quick-actions">
-        <button type="submit" class="primary-button danger-button">Delete Bill</button>
-        <a href="{% url 'bill_list' %}" class="secondary-button">Cancel</a>
+          <form method="post" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete Bill</button>
+            <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          </form>
+        </div>
       </div>
-    </form>
-  </section>
+    </div>
+  </div>
 {% endblock %}

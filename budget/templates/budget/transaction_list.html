@@ -4,55 +4,63 @@
 
 {% block content %}
   {# Header explains the page purpose and links back to the most common actions. #}
-  <section class="hero-card">
-    <h1>Transactions</h1>
-    <p>Review and manage all of your income and expense records in one place.</p>
-    <div class="quick-actions">
-      <a href="{% url 'add_transaction' %}" class="button-link">Add Transaction</a>
-      <a href="{% url 'home' %}" class="secondary-button">Back to Dashboard</a>
-    </div>
-  </section>
-
-  <section class="table-card">
-    <div class="section-heading">
-      <h2>All Transactions</h2>
-      <p>Only transactions for the current logged-in user are shown here.</p>
-    </div>
-
-    {% if transactions %}
-      {# Full table shown here — more columns than the dashboard preview. #}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Category</th>
-              <th>Amount</th>
-              <th>Note</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for transaction in transactions %}
-              {# Each row has edit/delete links for direct CRUD access. #}
-              <tr>
-                <td>{{ transaction.date }}</td>
-                <td>{{ transaction.get_type_display }}</td>
-                <td>{{ transaction.category }}</td>
-                <td>${{ transaction.amount }}</td>
-                <td>{{ transaction.note|default:"" }}</td>
-                <td class="actions-cell">
-                  <a href="{% url 'edit_transaction' transaction.id %}">Edit</a>
-                  <a href="{% url 'delete_transaction' transaction.id %}">Delete</a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h1 class="card-title h3">Transactions</h1>
+      <p class="text-muted">Review and manage all of your income and expense records in one place.</p>
+      <div class="d-flex gap-2">
+        <a href="{% url 'add_transaction' %}" class="btn btn-primary">Add Transaction</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
       </div>
-    {% else %}
-      <p class="muted-text">You have not added any transactions yet.</p>
-    {% endif %}
-  </section>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">All Transactions</h5>
+      <p class="text-muted small">Only transactions for the current logged-in user are shown here.</p>
+
+      {% if transactions %}
+        {# Full table shown here — more columns than the dashboard preview. #}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Note</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for transaction in transactions %}
+                {# Each row has edit/delete links for direct CRUD access. #}
+                <tr>
+                  <td>{{ transaction.date }}</td>
+                  <td>
+                    {% if transaction.type == 'INCOME' %}
+                      <span class="badge bg-success">Income</span>
+                    {% else %}
+                      <span class="badge bg-danger">Expense</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ transaction.category }}</td>
+                  <td>${{ transaction.amount }}</td>
+                  <td>{{ transaction.note|default:"" }}</td>
+                  <td>
+                    <a href="{% url 'edit_transaction' transaction.id %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                    <a href="{% url 'delete_transaction' transaction.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">You have not added any transactions yet.</p>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

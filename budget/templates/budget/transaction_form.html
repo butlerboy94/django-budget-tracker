@@ -3,31 +3,37 @@
 {% block title %}{{ page_title }} | Budget Tracker{% endblock %}
 
 {% block content %}
-  <section class="form-card">
-    <div class="section-heading">
-      <h1>{{ heading }}</h1>
-      <p>Enter the transaction details below to update your financial records.</p>
-    </div>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h1 class="card-title h4">{{ heading }}</h1>
+          <p class="text-muted">Enter the transaction details below to update your financial records.</p>
 
-    <form method="post" class="stack-form">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+          <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-      {% for field in form %}
-        <div class="form-row">
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% if field.help_text %}
-            <p class="help-text">{{ field.help_text }}</p>
-          {% endif %}
-          {{ field.errors }}
+            {% for field in form %}
+              <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+              <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+            </div>
+          </form>
         </div>
-      {% endfor %}
-
-      <div class="quick-actions">
-        <button type="submit" class="primary-button">{{ submit_label }}</button>
-        <a href="{% url 'home' %}" class="secondary-button">Back to Dashboard</a>
       </div>
-    </form>
-  </section>
+    </div>
+  </div>
 {% endblock %}

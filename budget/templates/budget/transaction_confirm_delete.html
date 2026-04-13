@@ -4,28 +4,32 @@
 
 {% block content %}
   {# Confirmation step prevents accidental deletion of a transaction. #}
-  <section class="form-card">
-    <div class="section-heading">
-      <h1>Delete Transaction</h1>
-      <p>Confirm that you want to remove this transaction from your records.</p>
-    </div>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+          <h4 class="mb-0">Delete Transaction</h4>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">Confirm that you want to remove this transaction from your records.</p>
 
-    {# Transaction details shown so the user can verify they are deleting the right record. #}
-    <div class="summary-card">
-      <p><strong>Date:</strong> {{ transaction.date }}</p>
-      <p><strong>Type:</strong> {{ transaction.get_type_display }}</p>
-      <p><strong>Category:</strong> {{ transaction.category }}</p>
-      <p><strong>Amount:</strong> ${{ transaction.amount }}</p>
-      <p><strong>Note:</strong> {{ transaction.note|default:"No note provided." }}</p>
-    </div>
+          {# Transaction details shown so the user can verify they are deleting the right record. #}
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><strong>Date:</strong> {{ transaction.date }}</li>
+            <li class="list-group-item"><strong>Type:</strong> {{ transaction.get_type_display }}</li>
+            <li class="list-group-item"><strong>Category:</strong> {{ transaction.category }}</li>
+            <li class="list-group-item"><strong>Amount:</strong> ${{ transaction.amount }}</li>
+            <li class="list-group-item"><strong>Note:</strong> {{ transaction.note|default:"No note provided." }}</li>
+          </ul>
 
-    {# POST-only delete prevents accidental deletion via a simple page visit or bookmark. #}
-    <form method="post" class="stack-form">
-      {% csrf_token %}
-      <div class="quick-actions">
-        <button type="submit" class="primary-button danger-button">Delete Transaction</button>
-        <a href="{% url 'transaction_list' %}" class="secondary-button">Cancel</a>
+          {# POST-only delete prevents accidental deletion via a simple page visit or bookmark. #}
+          <form method="post" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete Transaction</button>
+            <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          </form>
+        </div>
       </div>
-    </form>
-  </section>
+    </div>
+  </div>
 {% endblock %}
