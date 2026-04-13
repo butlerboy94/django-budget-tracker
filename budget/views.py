@@ -1,7 +1,11 @@
+import json
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import BillForm, RegisterForm, TransactionForm
@@ -68,6 +72,52 @@ def home(request):
     paid_bills = bills.filter(paid=True).count()
     unpaid_bills = bills.filter(paid=False).count()
 
+    # Build the last 6 months as date objects (first day of each month) so we
+    # can create labeled buckets for the bar chart regardless of whether the
+    # user has any transactions in a given month.
+    today = date.today()
+    chart_months = []
+    for i in range(5, -1, -1):
+        month = today.month - i
+        year = today.year
+        while month <= 0:
+            month += 12
+            year -= 1
+        chart_months.append(date(year, month, 1))
+
+    chart_start = chart_months[0]
+
+    # Group income transactions by month and store as a {YYYY-MM: total} dict
+    # so they can be looked up by the label keys built above.
+    income_by_month = {
+        row["month"].strftime("%Y-%m"): float(row["total"])
+        for row in (
+            Transaction.objects
+            .filter(user=user, type=Transaction.INCOME, date__gte=chart_start)
+            .annotate(month=TruncMonth("date"))
+            .values("month")
+            .annotate(total=Sum("amount"))
+        )
+    }
+
+    # Same grouping for expense transactions.
+    expense_by_month = {
+        row["month"].strftime("%Y-%m"): float(row["total"])
+        for row in (
+            Transaction.objects
+            .filter(user=user, type=Transaction.EXPENSE, date__gte=chart_start)
+            .annotate(month=TruncMonth("date"))
+            .values("month")
+            .annotate(total=Sum("amount"))
+        )
+    }
+
+    # Convert the month buckets into parallel JSON arrays that Chart.js can
+    # consume directly: labels (human-readable month names) and two data series.
+    chart_labels = json.dumps([m.strftime("%b %Y") for m in chart_months])
+    chart_income = json.dumps([income_by_month.get(m.strftime("%Y-%m"), 0) for m in chart_months])
+    chart_expense = json.dumps([expense_by_month.get(m.strftime("%Y-%m"), 0) for m in chart_months])
+
     context = {
         "income_total": income_total,
         "expense_total": expense_total,
@@ -77,6 +127,11 @@ def home(request):
         "unpaid_bills": unpaid_bills,
         "bills": bills,
         "transactions": transactions,
+        # Chart data passed as JSON strings so the template can inject them
+        # directly into the Chart.js configuration without extra serialization.
+        "chart_labels": chart_labels,
+        "chart_income": chart_income,
+        "chart_expense": chart_expense,
     }
     return render(request, "budget/dashboard.html", context)
 
