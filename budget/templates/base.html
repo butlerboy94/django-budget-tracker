@@ -48,8 +48,7 @@
 
     {% block content %}{% endblock %}
   </main>
-  {# Child templates that need page-specific JavaScript (e.g. charts) can
-     override this block without touching the shared base layout. #}
+  {# Child templates override this block to inject page-specific scripts. #}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

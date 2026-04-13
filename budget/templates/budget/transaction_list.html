@@ -3,8 +3,7 @@
 {% block title %}Transactions | Budget Tracker{% endblock %}
 
 {% block content %}
-  {# Header section explains the purpose of the page and gives users quick
-     navigation back to the most common actions. #}
+  {# Header explains the page purpose and links back to the most common actions. #}
   <section class="hero-card">
     <h1>Transactions</h1>
     <p>Review and manage all of your income and expense records in one place.</p>
@@ -21,8 +20,7 @@
     </div>
 
     {% if transactions %}
-      {# This table is intentionally more complete than the dashboard version
-         because it acts as the main transaction management page. #}
+      {# Full table shown here — more columns than the dashboard preview. #}
       <div class="table-wrap">
         <table>
           <thead>
@@ -37,8 +35,7 @@
           </thead>
           <tbody>
             {% for transaction in transactions %}
-              {# Each row includes direct edit/delete links so the CRUD flow is
-                 easy to demonstrate during the presentation. #}
+              {# Each row has edit/delete links for direct CRUD access. #}
               <tr>
                 <td>{{ transaction.date }}</td>
                 <td>{{ transaction.get_type_display }}</td>

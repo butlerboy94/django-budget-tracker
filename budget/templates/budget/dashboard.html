@@ -35,16 +35,14 @@
     </article>
   </section>
 
-  {# Chart section visualizes income vs expenses over the last 6 months so the
-     user can spot spending trends at a glance without reading the full table. #}
+  {# Chart section: income vs expenses bar chart and overall doughnut chart. #}
   <section class="charts-grid" aria-label="Financial charts">
     <article class="chart-card">
       <div class="section-heading">
         <h2>Income vs Expenses (Last 6 Months)</h2>
         <p>Monthly breakdown of your income and spending.</p>
       </div>
-      {# Chart.js renders into this canvas element. Width/height are overridden
-         by the responsive option so the chart fills the card on any screen. #}
+      {# Chart.js renders into this canvas; responsive option controls sizing. #}
       <canvas id="barChart" height="120"></canvas>
     </article>
 
@@ -137,8 +135,7 @@
 {% endblock %}
 
 {% block extra_js %}
-{# Chart.js is loaded from a CDN so no local install is needed. The integrity
-   hash ensures the file has not been tampered with (subresource integrity). #}
+{# Chart.js via CDN — integrity hash ensures the file has not been tampered with. #}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
         integrity="sha256-9oCASCRSCANLHr9GFNP83yiJNLbwVy6k72V7Xll7GK0="
         crossorigin="anonymous"></script>
