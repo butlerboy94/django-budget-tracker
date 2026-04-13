@@ -3,135 +3,168 @@
 {% block title %}Dashboard | Budget Tracker{% endblock %}
 
 {% block content %}
-  {# Top section gives the user a quick summary and shortcut actions. #}
-  <section class="hero-card">
-    <h1>Budget Dashboard</h1>
-    <p>Welcome back, {{ user.username }}. Here is a snapshot of your current financial activity.</p>
-    <div class="quick-actions">
-      <a href="{% url 'add_transaction' %}" class="button-link">Add Transaction</a>
-      <a href="{% url 'transaction_list' %}" class="secondary-button">View Transactions</a>
-      <a href="{% url 'bill_list' %}" class="secondary-button">View Bills</a>
-      <a href="{% url 'add_bill' %}" class="secondary-button">Add Bill</a>
+  {# Welcome card with quick-action buttons across the top of the dashboard. #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h1 class="card-title h3">Budget Dashboard</h1>
+      <p class="text-muted">Welcome back, {{ user.username }}. Here is a snapshot of your current financial activity.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'add_transaction' %}" class="btn btn-primary">Add Transaction</a>
+        <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">View Transactions</a>
+        <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">View Bills</a>
+        <a href="{% url 'add_bill' %}" class="btn btn-outline-secondary">Add Bill</a>
+      </div>
     </div>
-  </section>
+  </div>
 
-  {# Summary cards show the major financial totals calculated in the view. #}
-  <section class="summary-grid" aria-label="Financial summary">
-    <article class="summary-card">
-      <p class="stat-label">Total Income</p>
-      <p class="stat-value">${{ income_total }}</p>
-    </article>
-    <article class="summary-card">
-      <p class="stat-label">Total Expenses</p>
-      <p class="stat-value">${{ expense_total }}</p>
-    </article>
-    <article class="summary-card">
-      <p class="stat-label">Net Balance</p>
-      <p class="stat-value">${{ balance }}</p>
-    </article>
-    <article class="summary-card">
-      <p class="stat-label">Unpaid Bills</p>
-      <p class="stat-value">{{ unpaid_bills }}</p>
-    </article>
-  </section>
+  {# Four summary stat cards — colored left border distinguishes each metric. #}
+  <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+      <div class="card shadow-sm h-100 border-start border-success border-4">
+        <div class="card-body">
+          <p class="text-muted mb-1 small">Total Income</p>
+          <p class="fs-3 fw-bold mb-0">${{ income_total }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card shadow-sm h-100 border-start border-danger border-4">
+        <div class="card-body">
+          <p class="text-muted mb-1 small">Total Expenses</p>
+          <p class="fs-3 fw-bold mb-0">${{ expense_total }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card shadow-sm h-100 border-start border-primary border-4">
+        <div class="card-body">
+          <p class="text-muted mb-1 small">Net Balance</p>
+          <p class="fs-3 fw-bold mb-0">${{ balance }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card shadow-sm h-100 border-start border-warning border-4">
+        <div class="card-body">
+          <p class="text-muted mb-1 small">Unpaid Bills</p>
+          <p class="fs-3 fw-bold mb-0">{{ unpaid_bills }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   {# Chart section: income vs expenses bar chart and overall doughnut chart. #}
-  <section class="charts-grid" aria-label="Financial charts">
-    <article class="chart-card">
-      <div class="section-heading">
-        <h2>Income vs Expenses (Last 6 Months)</h2>
-        <p>Monthly breakdown of your income and spending.</p>
+  <div class="charts-grid">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Income vs Expenses (Last 6 Months)</h5>
+        <p class="text-muted small">Monthly breakdown of your income and spending.</p>
+        {# Chart.js renders into this canvas; responsive option controls sizing. #}
+        <canvas id="barChart" height="120"></canvas>
       </div>
-      {# Chart.js renders into this canvas; responsive option controls sizing. #}
-      <canvas id="barChart" height="120"></canvas>
-    </article>
-
-    <article class="chart-card">
-      <div class="section-heading">
-        <h2>Income vs Expenses (Overall)</h2>
-        <p>Your total income and expense split since you started tracking.</p>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Income vs Expenses (Overall)</h5>
+        <p class="text-muted small">Your total income and expense split since you started tracking.</p>
+        <canvas id="doughnutChart" height="120"></canvas>
       </div>
-      <canvas id="doughnutChart" height="120"></canvas>
-    </article>
-  </section>
+    </div>
+  </div>
 
-  {# The lower dashboard area combines recent transactions with bill status so the user can review both from one screen. #}
-  <section class="content-grid">
-    <article class="table-card">
-      <div class="section-heading">
-        <h2>Recent Transactions</h2>
-        <p>Your 10 most recent income and expense entries.</p>
-      </div>
-
-      {% if transactions %}
-        <div class="table-wrap">
-          <table>
-            <thead>
-              {# Actions are included here so users can jump straight from the dashboard into edit or delete workflows. #}
-              <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Note</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for tx in transactions %}
-                <tr>
-                  <td>{{ tx.date }}</td>
-                  <td>{{ tx.get_type_display }}</td>
-                  <td>{{ tx.category }}</td>
-                  <td>${{ tx.amount }}</td>
-                  <td>{{ tx.note|default:"" }}</td>
-                  <td class="actions-cell">
-                    <a href="{% url 'edit_transaction' tx.id %}">Edit</a>
-                    <a href="{% url 'delete_transaction' tx.id %}">Delete</a>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+  {# Recent transactions table and bill overview sit side by side on desktop. #}
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Recent Transactions</h5>
+          <p class="text-muted small">Your 10 most recent income and expense entries.</p>
+          {% if transactions %}
+            <div class="table-responsive">
+              <table class="table table-hover table-sm align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for tx in transactions %}
+                    <tr>
+                      <td>{{ tx.date }}</td>
+                      <td>
+                        {# Badges give income/expense an immediate color-coded visual cue. #}
+                        {% if tx.type == 'INCOME' %}
+                          <span class="badge bg-success">Income</span>
+                        {% else %}
+                          <span class="badge bg-danger">Expense</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ tx.category }}</td>
+                      <td>${{ tx.amount }}</td>
+                      <td>{{ tx.note|default:"" }}</td>
+                      <td>
+                        <a href="{% url 'edit_transaction' tx.id %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                        <a href="{% url 'delete_transaction' tx.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted">No transactions yet. Add one to get started.</p>
+          {% endif %}
         </div>
-      {% else %}
-        <p class="muted-text">No transactions yet. Add one to get started.</p>
-      {% endif %}
-    </article>
-
-    <article class="list-card">
-      <div class="section-heading">
-        <h2>Bill Overview</h2>
-        <p>Total bills: {{ total_bills }}. Paid: {{ paid_bills }}. Unpaid: {{ unpaid_bills }}.</p>
       </div>
+    </div>
 
-      {# Bills stay on the dashboard because the user often needs quick status visibility even before full bill CRUD is added. #}
-      {% if bills %}
-        <ul class="bill-list">
-          {% for bill in bills %}
-            <li>
-              <strong>{{ bill.name }}</strong><br>
-              ${{ bill.amount }} due on {{ bill.due_date }}<br>
-              Status: {% if bill.paid %}Paid{% else %}Unpaid{% endif %}
-
-              <div class="bill-actions">
-                <form method="post" action="{% url 'toggle_bill_paid' bill.id %}" class="inline-form">
-                  {% csrf_token %}
-                  <button type="submit" class="secondary-button">
-                    Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
-                  </button>
-                </form>
-                <a href="{% url 'edit_bill' bill.id %}">Edit</a>
-                <a href="{% url 'delete_bill' bill.id %}">Delete</a>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="muted-text">No bills yet. Add one to get started.</p>
-      {% endif %}
-    </article>
-  </section>
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Bill Overview</h5>
+          <p class="text-muted small">
+            Total: {{ total_bills }} &nbsp;|&nbsp; Paid: {{ paid_bills }} &nbsp;|&nbsp; Unpaid: {{ unpaid_bills }}
+          </p>
+          {% if bills %}
+            <ul class="list-group list-group-flush">
+              {% for bill in bills %}
+                <li class="list-group-item px-0">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <div>
+                      <strong>{{ bill.name }}</strong><br>
+                      <small class="text-muted">${{ bill.amount }} due {{ bill.due_date }}</small><br>
+                      {% if bill.paid %}
+                        <span class="badge bg-success">Paid</span>
+                      {% else %}
+                        <span class="badge bg-danger">Unpaid</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="d-flex gap-2 mt-2 flex-wrap">
+                    <form method="post" action="{% url 'toggle_bill_paid' bill.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        Mark as {% if bill.paid %}Unpaid{% else %}Paid{% endif %}
+                      </button>
+                    </form>
+                    <a href="{% url 'edit_bill' bill.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="{% url 'delete_bill' bill.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">No bills yet. Add one to get started.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -141,13 +174,10 @@
         crossorigin="anonymous"></script>
 
 <script>
-  // The view passed these values as JSON strings, so we parse them back into
-  // JavaScript arrays. Using |safe tells Django not to HTML-escape the JSON.
   const labels  = {{ chart_labels|safe }};
   const income  = {{ chart_income|safe }};
   const expense = {{ chart_expense|safe }};
 
-  // Bar chart — income (green) and expenses (red) side by side for each month.
   new Chart(document.getElementById('barChart'), {
     type: 'bar',
     data: {
@@ -172,54 +202,29 @@
     options: {
       responsive: true,
       plugins: {
-        // Tooltip prefix so amounts display as currency values.
-        tooltip: {
-          callbacks: {
-            label: ctx => ' $' + ctx.parsed.y.toFixed(2),
-          },
-        },
+        tooltip: { callbacks: { label: ctx => ' $' + ctx.parsed.y.toFixed(2) } },
       },
       scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            // Y-axis labels also show as dollar amounts.
-            callback: val => '$' + val,
-          },
-        },
+        y: { beginAtZero: true, ticks: { callback: val => '$' + val } },
       },
     },
   });
 
-  // Doughnut chart — uses the all-time totals already on the page rather than
-  // the 6-month window, giving the user an overall picture of their finances.
   new Chart(document.getElementById('doughnutChart'), {
     type: 'doughnut',
     data: {
       labels: ['Total Income', 'Total Expenses'],
-      datasets: [
-        {
-          data: [{{ income_total }}, {{ expense_total }}],
-          backgroundColor: [
-            'rgba(34, 197, 94, 0.7)',
-            'rgba(239, 68, 68, 0.7)',
-          ],
-          borderColor: [
-            'rgba(34, 197, 94, 1)',
-            'rgba(239, 68, 68, 1)',
-          ],
-          borderWidth: 1,
-        },
-      ],
+      datasets: [{
+        data: [{{ income_total }}, {{ expense_total }}],
+        backgroundColor: ['rgba(34, 197, 94, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+        borderColor: ['rgba(34, 197, 94, 1)', 'rgba(239, 68, 68, 1)'],
+        borderWidth: 1,
+      }],
     },
     options: {
       responsive: true,
       plugins: {
-        tooltip: {
-          callbacks: {
-            label: ctx => ' $' + ctx.parsed.toFixed(2),
-          },
-        },
+        tooltip: { callbacks: { label: ctx => ' $' + ctx.parsed.toFixed(2) } },
       },
     },
   });
