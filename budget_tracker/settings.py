@@ -116,3 +116,11 @@ STATIC_URL = 'static/'
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
+
+# Map Django's built-in message levels to Bootstrap alert class names.
+# By default Django uses "error" but Bootstrap expects "danger", so this
+# override makes flash messages style correctly without any template logic.
+from django.contrib.messages import constants as message_constants
+MESSAGE_TAGS = {
+    message_constants.ERROR: "danger",
+}
