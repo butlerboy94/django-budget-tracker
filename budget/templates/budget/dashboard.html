@@ -35,6 +35,28 @@
     </article>
   </section>
 
+  {# Chart section visualizes income vs expenses over the last 6 months so the
+     user can spot spending trends at a glance without reading the full table. #}
+  <section class="charts-grid" aria-label="Financial charts">
+    <article class="chart-card">
+      <div class="section-heading">
+        <h2>Income vs Expenses (Last 6 Months)</h2>
+        <p>Monthly breakdown of your income and spending.</p>
+      </div>
+      {# Chart.js renders into this canvas element. Width/height are overridden
+         by the responsive option so the chart fills the card on any screen. #}
+      <canvas id="barChart" height="120"></canvas>
+    </article>
+
+    <article class="chart-card">
+      <div class="section-heading">
+        <h2>Income vs Expenses (Overall)</h2>
+        <p>Your total income and expense split since you started tracking.</p>
+      </div>
+      <canvas id="doughnutChart" height="120"></canvas>
+    </article>
+  </section>
+
   {# The lower dashboard area combines recent transactions with bill status so the user can review both from one screen. #}
   <section class="content-grid">
     <article class="table-card">
@@ -112,4 +134,97 @@
       {% endif %}
     </article>
   </section>
+{% endblock %}
+
+{% block extra_js %}
+{# Chart.js is loaded from a CDN so no local install is needed. The integrity
+   hash ensures the file has not been tampered with (subresource integrity). #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+        integrity="sha256-9oCASCRSCANLHr9GFNP83yiJNLbwVy6k72V7Xll7GK0="
+        crossorigin="anonymous"></script>
+
+<script>
+  // The view passed these values as JSON strings, so we parse them back into
+  // JavaScript arrays. Using |safe tells Django not to HTML-escape the JSON.
+  const labels  = {{ chart_labels|safe }};
+  const income  = {{ chart_income|safe }};
+  const expense = {{ chart_expense|safe }};
+
+  // Bar chart — income (green) and expenses (red) side by side for each month.
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Income',
+          data: income,
+          backgroundColor: 'rgba(34, 197, 94, 0.7)',
+          borderColor: 'rgba(34, 197, 94, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Expenses',
+          data: expense,
+          backgroundColor: 'rgba(239, 68, 68, 0.7)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        // Tooltip prefix so amounts display as currency values.
+        tooltip: {
+          callbacks: {
+            label: ctx => ' $' + ctx.parsed.y.toFixed(2),
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            // Y-axis labels also show as dollar amounts.
+            callback: val => '$' + val,
+          },
+        },
+      },
+    },
+  });
+
+  // Doughnut chart — uses the all-time totals already on the page rather than
+  // the 6-month window, giving the user an overall picture of their finances.
+  new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Total Income', 'Total Expenses'],
+      datasets: [
+        {
+          data: [{{ income_total }}, {{ expense_total }}],
+          backgroundColor: [
+            'rgba(34, 197, 94, 0.7)',
+            'rgba(239, 68, 68, 0.7)',
+          ],
+          borderColor: [
+            'rgba(34, 197, 94, 1)',
+            'rgba(239, 68, 68, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ctx => ' $' + ctx.parsed.toFixed(2),
+          },
+        },
+      },
+    },
+  });
+</script>
 {% endblock %}
