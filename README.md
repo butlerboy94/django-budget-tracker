@@ -1,115 +1,119 @@
-## Django Budget Tracker
+# Django Budget Tracker
 
-A full-stack financial management web application built with Django that allows users to track income, expenses, and bills through an interactive dashboard. 
-This project was developed as a capstone application to demonstrate backend development, database design, authentication, financial logic processing, 
-and professional version-controlled software engineering workflow.
+A full-stack personal finance web application built with Django. Users can track income, expenses, and bills through a secure, authenticated dashboard with real-time financial summaries.
 
-## Project Overview
+Built as a capstone project to demonstrate backend development, relational database design, user authentication, Django ORM aggregation, and automated testing.
 
-The Django Budget Tracker is a secure, user-authenticated budgeting application that enables individuals to manage personal finances efficiently. Users can record income and expense transactions, manage bills, and monitor financial summaries through a dynamic dashboard.
-
-## This project demonstrates:
-- Clean relational database design
-- Secure per-user data isolation
-- Financial aggregation using Django ORM
-- Full CRUD functionality
-- Real-world Git and GitHub workflow practices
+---
 
 ## Features
-- User authentication (login/logout)
-- Secure user-specific financial data
-- Add income and expense transactions
-- Add and manage bills
-- Mark bills as paid or unpaid
-- Financial dashboard displaying:
-  - Total income
-  - Total expenses
-  - Net balance
-  - Bill statistics (total, paid, unpaid)
-- Recent transaction display
-- Real-time calculations using Django ORM aggregation
-- Git version control with remote GitHub repository
+
+- **User Authentication** — Secure registration, login, and logout with auto-login after signup
+- **Transaction Tracking** — Full CRUD for income and expense transactions, categorized and dated
+- **Bills Management** — Add bills with due dates, mark as paid/unpaid, and track totals
+- **Financial Dashboard** — Live summary of total income, total expenses, net balance, and bill stats
+- **Per-User Data Isolation** — All data is scoped to the authenticated user; no cross-user data leakage
+- **Automated Tests** — Test coverage for CRUD operations and user access control
+
+---
 
 ## Tech Stack
-- Python 3
-- Django
-- SQLite
-- HTML
-- Git
-- GitHub
+
+| Layer | Technology |
+|---|---|
+| Framework | Django |
+| Database | SQLite (development) |
+| Language | Python 3 |
+| Frontend | Django Templates · HTML · CSS |
+| Version Control | Git · GitHub |
+
+---
 
 ## Database Design
-Transaction Model
-- User (ForeignKey)
-- Date
-- Type (Income / Expense)
-- Category
-- Amount
-- Optional note
 
-## Bill Model
-- User (ForeignKey)
-- Name
-- Amount
-- Due date
-- Paid status (Boolean)
-- Optional notes
+### Transaction Model
+| Field | Type | Notes |
+|---|---|---|
+| user | ForeignKey | Scoped per user |
+| date | DateField | |
+| type | CharField | Income or Expense |
+| category | CharField | |
+| amount | DecimalField | |
+| note | TextField | Optional |
+
+### Bill Model
+| Field | Type | Notes |
+|---|---|---|
+| user | ForeignKey | Scoped per user |
+| name | CharField | |
+| amount | DecimalField | |
+| due_date | DateField | |
+| paid | BooleanField | |
+| notes | TextField | Optional |
+
 Database indexing is implemented for optimized querying by user and date.
+
+---
 
 ## Installation & Setup
 
-Clone the repository:
-- git clone https://github.com/butlerboy94/django-budget-tracker.git
-- cd django-budget-tracker
+```bash
+# Clone the repository
+git clone https://github.com/butlerboy94/django-budget-tracker.git
+cd django-budget-tracker
 
-Create and activate a virtual environment:
-- python -m venv venv
-- venv\Scripts\activate
+# Create and activate a virtual environment
+python -m venv venv
+venv\Scripts\activate       # Windows
+# source venv/bin/activate  # Mac/Linux
 
-Install Django:
-- pip install django
+# Install dependencies
+pip install django
 
-Run migrations:
-- python manage.py migrate
+# Run migrations
+python manage.py migrate
 
-Create a superuser (optional):
-- python manage.py createsuperuser
+# (Optional) Create a superuser
+python manage.py createsuperuser
 
-Start the devlopment server:
-- python manage.py runserver
+# Start the development server
+python manage.py runserver
+```
 
-Open the browser:
-- http://127.0.0.1:8000/
+Open your browser at: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
-## Development Workflow
+---
 
-This project follows a professional Git workflow:
+## Running Tests
 
-- Local development environment
-- Structured commits
-- Remote repository hosted on GitHub
-- Incremental feature development
-- Version-controlled history tracking
+```bash
+python manage.py test
+```
 
-## All new features are committed and pushed to GitHub to simulate real-world software engineering practices.
+Tests cover:
+- Transaction CRUD (create, read, update, delete)
+- Bill CRUD
+- User access control (users cannot access other users' data)
 
-Future Enhancements:
+---
 
-[ ] Monthly budgeting filters
+## Future Enhancements
 
-[ ] Financial data visualization (charts)
+- [ ] Monthly budgeting filters
+- [x] Financial data visualization (charts)
+- [ ] Exportable reports (CSV or PDF)
+- [ ] Recurring bill automation
+- [x] Category management system
+- [x] UI/UX improvements
 
-[ ] Exportable reports (CSV or PDF)
-
-[ ] Recurring bill automation
-
-[ ] UI/UX improvements
-
-[ ] Category management system
+---
 
 ## Author
 
-- Kaleb Butler
-- Associate of Applied Science – Computer Programming
-- Rose State College
-- GitHub: https://github.com/butlerboy94
+**Kaleb Butler**
+Associate of Applied Science – Computer Programming
+Rose State College
+
+- 🌐 GitHub: [github.com/butlerboy94](https://github.com/butlerboy94)
+- 📧 Email: [butlerkaleb0@gmail.com](mailto:butlerkaleb0@gmail.com)
+- 💼 LinkedIn: [linkedin.com/in/kaleb-butler](https://www.linkedin.com/in/kaleb-butler)
