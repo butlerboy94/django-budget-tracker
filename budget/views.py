@@ -47,19 +47,19 @@ def home(request):
 
     # Aggregate income and expense totals separately, then use them to build
     # the current account balance shown at the top of the dashboard.
-    income_total = (
+    income_total = round(
         Transaction.objects
         .filter(user=user, type=Transaction.INCOME)
-        .aggregate(total=Sum("amount"))["total"] or 0
+        .aggregate(total=Sum("amount"))["total"] or 0, 2
     )
 
-    expense_total = (
+    expense_total = round(
         Transaction.objects
         .filter(user=user, type=Transaction.EXPENSE)
-        .aggregate(total=Sum("amount"))["total"] or 0
+        .aggregate(total=Sum("amount"))["total"] or 0, 2
     )
 
-    balance = income_total - expense_total
+    balance = round(income_total - expense_total, 2)
 
     # Show only recent activity on the dashboard to keep the page focused,
     # while still giving the user a link to the full transaction history.
