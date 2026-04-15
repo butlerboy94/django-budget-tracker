@@ -1,3 +1,6 @@
+import os
+import dj_database_url
+
 """
 Django settings for budget_tracker project.
 
@@ -19,11 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b#q&_#kq0l^ouzc#!ob8j!o=2um7riooog2fk2m2mwqq=@$-&l'
 
 # DEBUG=True shows detailed error pages while developing.
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS controls which hostnames are allowed to serve this project.
 # An empty list is common during local development.
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # INSTALLED_APPS tells Django which built-in features and local apps should be
@@ -42,6 +45,7 @@ INSTALLED_APPS = [
 # load. For example, some handle sessions, authentication, or CSRF protection.
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,10 +78,10 @@ WSGI_APPLICATION = 'budget_tracker.wsgi.application'
 # The project uses SQLite, which stores all data in a single file. This keeps
 # setup simple for a capstone project.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
+    )
 }
 
 
@@ -109,7 +113,9 @@ USE_TZ = True
 
 
 # STATIC_URL is the URL prefix Django uses to serve CSS and other static files.
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # These settings decide where users are sent for login, after login, and after
 # logout.
