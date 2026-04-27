@@ -59,6 +59,13 @@ def home(request):
         .aggregate(total=Sum("amount"))["total"] or 0, 2
     )
 
+    paid_bills_total = round(
+        Bill.objects
+        .filter(user=user, paid=True)
+        .aggregate(total=Sum("amount"))["total"] or 0, 2
+    )
+
+    expense_total = round(expense_total + paid_bills_total, 2)
     balance = round(income_total - expense_total, 2)
 
     # Show only recent activity on the dashboard to keep the page focused,
