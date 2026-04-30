@@ -99,10 +99,7 @@ Tests cover:
 
 ## Future Enhancements
 
-- [ ] Monthly budgeting filters
 - [x] Financial data visualization (charts)
-- [ ] Exportable reports (CSV or PDF)
-- [ ] Recurring bill automation
 - [x] Category management system
 - [x] UI/UX improvements
 
