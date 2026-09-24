@@ -1,4 +1,5 @@
 # Django Budget Tracker
+![Django CI](https://github.com/butlerboy94/django-budget-tracker/actions/workflows/ci.yml/badge.svg)
 
 A full-stack personal finance web application built with Django. Users can track income, expenses, and bills through a secure, authenticated dashboard with real-time financial summaries.
 
